@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:nebula_team_manager/LoginPage.dart';
+import 'package:nebula_team_manager/Services/PopUp.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'Services/Logs.dart';
 
 import 'Classes.dart';
 
@@ -14,6 +16,7 @@ class AdminPage extends StatefulWidget {
 }
 
 class _AdminPageState extends State<AdminPage> {
+
   String userTeam = '';
   String userType = '';
   List<NebulaUser> userList = []; // List to store fetched users
@@ -71,17 +74,6 @@ class _AdminPageState extends State<AdminPage> {
     });
   }
 
-  void _signOut() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.remove('uid');
-
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder: (context) => const LoginPage(),
-      ),
-    );
-  }
-
   void updateUserFunc(NebulaUser user) async {
     try {
       // Get a reference to the user document in Firestore
@@ -105,19 +97,7 @@ class _AdminPageState extends State<AdminPage> {
         const SnackBar(content: Text('User Updated')),
       );
     } catch (e) {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Error'),
-          content: const Text('An error occurred'),
-          actions: [
-            TextButton(
-              child: const Text('OK'),
-              onPressed: () => Navigator.pop(context),
-            ),
-          ],
-        ),
-      );
+      showDialogWithErrorMessage('An error occurred', context);
     }
   }
 
@@ -226,7 +206,7 @@ class _AdminPageState extends State<AdminPage> {
                   IconButton(
                     icon: const Icon(Icons.logout),
                     onPressed: () async {
-                      _signOut();
+                      signOut(context);
                       // You can add additional code here, such as navigating to a login page
                     },
                   ),
@@ -255,19 +235,7 @@ class _AdminPageState extends State<AdminPage> {
                           if (userType == 'Admin') {
                             updateUser(user);
                           } else {
-                            showDialog(
-                              context: context,
-                              builder: (context) => AlertDialog(
-                                title: const Text('Error'),
-                                content: const Text("You Don't have the permission for that"),
-                                actions: [
-                                  TextButton(
-                                    child: const Text('OK'),
-                                    onPressed: () => Navigator.pop(context),
-                                  ),
-                                ],
-                              ),
-                            );
+                            showDialogWithErrorMessage("You Don't have the permission for that", context);
                           }
                         },
                         child: const Icon(Icons.update),

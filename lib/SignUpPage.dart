@@ -17,7 +17,7 @@ class _SignUpPageState extends State<SignUpPage> {
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   String? _email, _password, _name;
 
-  Future<void> _googleSignUp() async {
+  Future <void> _googleSignUp() async {
     try {
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       final GoogleSignInAuthentication googleAuth = await googleUser!.authentication;

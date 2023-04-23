@@ -4,6 +4,10 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+
+import 'Services/Logs.dart';
+import 'Services/PopUp.dart';
+
 import 'TeamMembers.dart';
 import 'SignUpPage.dart';
 import 'ResetPassword.dart';
@@ -16,7 +20,6 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -50,17 +53,10 @@ class _LoginPageState extends State<LoginPage> {
 
       try {
         final UserCredential userCredential =
-        await _auth.signInWithEmailAndPassword(
-          email: _emailController.text.trim(),
-          password: _passwordController.text.trim(),
-        );
+        await signInWithEmailAndPassword(
+            _emailController.text, _passwordController.text);
 
-        if (userCredential.user != null) {
-          String uid = userCredential.user!.uid;
-          SharedPreferences prefs = await SharedPreferences.getInstance();
-          await prefs.setString('uid', uid);
-        }
-
+        await saveUidToPrefs(userCredential.user);
 
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
@@ -81,27 +77,9 @@ class _LoginPageState extends State<LoginPage> {
           _isLoading = false;
         });
 
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('Error'),
-            content: Text(errorMessage),
-            actions: [
-              TextButton(
-                child: const Text('OK'),
-                onPressed: () => Navigator.pop(context),
-              ),
-            ],
-          ),
-        );
+        showDialogWithErrorMessage(errorMessage, context);
       }
     }
-  }
-  Future<void> _resetPassword() async {
-    showDialog(
-      context: context,
-      builder: (_) => PasswordResetDialog(),
-    );
   }
 
   @override
@@ -197,7 +175,12 @@ class _LoginPageState extends State<LoginPage> {
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     TextButton(
-                      onPressed: _resetPassword,
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (_) => PasswordResetDialog(),
+                        );
+                      },
                       child: const Text('Password Lost?'),
                     ),
                     TextButton(

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:nebula_team_manager/FreeUsersPage.dart';
-import 'package:nebula_team_manager/LoginPage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+
+import 'Services/Logs.dart';
+import 'Services/PopUp.dart';
 
 import 'Classes.dart';
 import 'AdminPage.dart';
@@ -81,33 +83,138 @@ class _TeamMembersPageState extends State<TeamMembersPage> {
   }
   }
 
-  void _signOut() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.remove('uid');
+  void updateUserFunc(NebulaUser user) async {
+    try {
+      // Get a reference to the user document in Firestore
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance.collection('Users').where('UserId', isEqualTo: user.UserId).limit(1).get();
 
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder: (context) => const LoginPage(),
-      ),
-    );
+      // Create a map with the updated data
+      Map<String, dynamic> updatedData = {
+        'Name': user.Name,
+        'UserType': user.UserType,
+        'UserId': user.UserId,
+        'Email': user.Email,
+        'Team': user.Team,
+        'SubType': user.SubType,
+      };
+
+      // Update the user document in Firestore
+      if (querySnapshot.docs.isNotEmpty) {
+        await querySnapshot.docs.first.reference.update(updatedData);
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('User Updated')),
+      );
+    } catch (e) {
+      showDialogWithErrorMessage('An error occurred', context);
+    }
+  }
+
+  void updateUser(NebulaUser user) async {
+    String username = user.Name;
+    String subtype = user.SubType;
+    List<String> subtypes = ['Basic', 'Medium', 'Premium'];
+    String usertype = user.UserType;
+    List<String> usertypes = ['User', 'TeamLeader'];
+
+    await showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Update User'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                TextField(
+                  decoration: InputDecoration(
+                    labelText: 'Username',
+                    hintText: user.Name,
+                  ),
+                  onChanged: (value) {
+                    setState(() {
+                      username = value;
+                    });
+                  },
+                ),
+                const SizedBox(height: 16),
+                DropdownButtonFormField(
+                  value: subtype,
+                  items: subtypes.map((subs) {
+                    return DropdownMenuItem(
+                      value: subs,
+                      child: Text(subs),
+                    );
+                  }).toList(),
+                  onChanged: (newValue) {
+                    setState(() {
+                      subtype = newValue!;
+                    });
+                  },
+                ),
+                const SizedBox(height: 16),
+                DropdownButtonFormField(
+                  value: usertype,
+                  items: usertypes.map((type) {
+                    return DropdownMenuItem(
+                      value: type,
+                      child: Text(type),
+                    );
+                  }).toList(),
+                  onChanged: (newValue) {
+                    setState(() {
+                      usertype = newValue!;
+                    });
+                  },
+                ),
+                const SizedBox(height: 16),
+              ],
+            ),
+            actions: <Widget>[
+              TextButton(
+                child: const Text('Cancel'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+              TextButton(
+                child: const Text('Delete Membership'),
+                onPressed: () {
+                  if (userType == 'TeamLeader') {
+                    deleteUser(user);
+                  } else {
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text('Error'),
+                        content: const Text("You Don't have the permission for that"),
+                        actions: [
+                          TextButton(
+                            child: const Text('OK'),
+                            onPressed: () => Navigator.pop(context),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+                },
+              ),
+              TextButton(
+                child: const Text('Update'),
+                onPressed: () {
+                  NebulaUser updatedUser = NebulaUser(UserId: user.UserId, Name: username, Team: user.Team, Email: user.Email, SubType: subtype, UserType: usertype);
+                  updateUserFunc(updatedUser);
+                  Navigator.of(context).pop(); // Close the pop-up dialog
+                },
+              ),
+            ],
+          );
+        });
+    fetchUsers();
   }
 
   void deleteUserMembership(NebulaUser user) async {
     if (userType == 'User') {
-      return (
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Error'),
-          content: const Text("You Don't have the permission for that"),
-          actions: [
-            TextButton(
-              child: const Text('OK'),
-              onPressed: () => Navigator.pop(context),
-            ),
-          ],
-        ),
-      ));
+      return (showDialogWithErrorMessage("You Don't have the permission for that", context));
     }
     try {
       // Get a reference to the user document in Firestore
@@ -127,20 +234,11 @@ class _TeamMembersPageState extends State<TeamMembersPage> {
       if (querySnapshot.docs.isNotEmpty) {
         await querySnapshot.docs.first.reference.update(updatedData);
       }
-    } catch (e) {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Error'),
-          content: const Text('An error occurred'),
-          actions: [
-            TextButton(
-              child: const Text('OK'),
-              onPressed: () => Navigator.pop(context),
-            ),
-          ],
-        ),
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('User Membership Deleted')),
       );
+    } catch (e) {
+      showDialogWithErrorMessage('An error occurred', context);
     }
   }
 
@@ -193,7 +291,7 @@ class _TeamMembersPageState extends State<TeamMembersPage> {
                   IconButton(
                     icon: const Icon(Icons.logout),
                     onPressed: () async {
-                      _signOut();
+                      signOut(context);
                       // You can add additional code here, such as navigating to a login page
                     },
                   ),
@@ -260,7 +358,7 @@ class _TeamMembersPageState extends State<TeamMembersPage> {
                   IconButton(
                     icon: const Icon(Icons.logout),
                     onPressed: () async {
-                      _signOut();
+                      signOut(context);
                       // You can add additional code here, such as navigating to a login page
                     },
                   ),
@@ -289,22 +387,10 @@ class _TeamMembersPageState extends State<TeamMembersPage> {
                           if (userType == 'TeamLeader') {
                             deleteUser(user);
                           } else {
-                            showDialog(
-                              context: context,
-                              builder: (context) => AlertDialog(
-                                title: const Text('Error'),
-                                content: const Text("You Don't have the permission for that"),
-                                actions: [
-                                  TextButton(
-                                    child: const Text('OK'),
-                                    onPressed: () => Navigator.pop(context),
-                                  ),
-                                ],
-                              ),
-                            );
+                            showDialogWithErrorMessage("You Don't have the permission for that", context);
                           }
                         },
-                        child: const Icon(Icons.delete),
+                        child: const Icon(Icons.update),
                       ),
                     );
                   },

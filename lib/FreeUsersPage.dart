@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:nebula_team_manager/LoginPage.dart';
+import 'package:nebula_team_manager/Services/PopUp.dart';
 import 'package:nebula_team_manager/TeamMembers.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'Classes.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import 'Services/Logs.dart';
+import 'Classes.dart';
 
 class FreeUsersPage extends StatefulWidget {
   const FreeUsersPage({Key? key}) : super (key: key);
@@ -71,17 +72,6 @@ class _FreeUsersPageState extends State<FreeUsersPage> {
     });
   }
 
-  void _signOut() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.remove('uid');
-
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder: (context) => const LoginPage(),
-      ),
-    );
-  }
-
   void addUserMembership(NebulaUser user) async {
     try {
       // Get a reference to the user document in Firestore
@@ -102,19 +92,7 @@ class _FreeUsersPageState extends State<FreeUsersPage> {
         await querySnapshot.docs.first.reference.update(updatedData);
       }
     } catch (e) {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Error'),
-          content: const Text('An error occurred'),
-          actions: [
-            TextButton(
-              child: const Text('OK'),
-              onPressed: () => Navigator.pop(context),
-            ),
-          ],
-        ),
-      );
+      showDialogWithErrorMessage('An error occurred', context);
     }
   }
 
@@ -167,7 +145,7 @@ class _FreeUsersPageState extends State<FreeUsersPage> {
                   IconButton(
                     icon: const Icon(Icons.logout),
                     onPressed: () async {
-                      _signOut();
+                      signOut(context);
                       // You can add additional code here, such as navigating to a login page
                     },
                   ),
@@ -234,7 +212,7 @@ class _FreeUsersPageState extends State<FreeUsersPage> {
                   IconButton(
                     icon: const Icon(Icons.logout),
                     onPressed: () async {
-                      _signOut();
+                      signOut(context);
                       // You can add additional code here, such as navigating to a login page
                     },
                   ),
@@ -263,19 +241,7 @@ class _FreeUsersPageState extends State<FreeUsersPage> {
                           if (userType == 'TeamLeader') {
                             addUser(user);
                           } else {
-                            showDialog(
-                              context: context,
-                              builder: (context) => AlertDialog(
-                                title: const Text('Error'),
-                                content: const Text("You Don't have the permission for that"),
-                                actions: [
-                                  TextButton(
-                                    child: const Text('OK'),
-                                    onPressed: () => Navigator.pop(context),
-                                  ),
-                                ],
-                              ),
-                            );
+                            showDialogWithErrorMessage("You Don't have the permission for that", context);
                           }
                         },
                         child: const Icon(Icons.add),

@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter_signin_button/flutter_signin_button.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'TeamMembers.dart';
+import 'SignInPage.dart';
 import 'ResetPassword.dart';
 
 class LoginPage extends StatefulWidget {
@@ -17,6 +20,7 @@ class _LoginPageState extends State<LoginPage> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
   bool _isLoading = false;
 
   @override
@@ -122,7 +126,7 @@ class _LoginPageState extends State<LoginPage> {
                   style: TextStyle(color: Colors.deepPurple[600], fontSize: 30),
                 ),
                 const Padding(padding: EdgeInsets.all(10.0)),
-                Text('Sign into your accunt',
+                Text('Sign into your account',
                   textAlign: TextAlign.center,
                   style: TextStyle(color: Colors.deepPurple[600], fontSize: 20),
                 ),
@@ -154,17 +158,59 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
                 const Padding(padding: EdgeInsets.all(25.0)),
-                ElevatedButton(
-                  style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all<Color>(Colors.deepPurple),
-                  ),
-                  onPressed: _isLoading ? null : _signInWithEmailAndPassword,
-                  child: const Text('Login'),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                      child: ElevatedButton(
+                        style: ButtonStyle(
+                          backgroundColor: MaterialStateProperty.all<Color>(Colors.deepPurple),
+                        ),
+                        onPressed: _isLoading ? null : _signInWithEmailAndPassword,
+                        child: const Text('Login'),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                      child: SignInButton(
+                        onPressed: () async {
+                          final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+                          final GoogleSignInAuthentication googleAuth =
+                          await googleUser!.authentication;
+                          final OAuthCredential credential = GoogleAuthProvider.credential(
+                              accessToken: googleAuth.accessToken, idToken: googleAuth.idToken);
+                          await FirebaseAuth.instance.signInWithCredential(credential);
+                        },
+                        Buttons.Google,
+                        text: "Login in with Google",
+                      ),
+                    ),
+                  ],
                 ),
                 const Padding(padding: EdgeInsets.all(25.0)),
-                TextButton(
-                  onPressed: _resetPassword,
-                  child: const Text('Password Lost?'),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    TextButton(
+                      onPressed: _resetPassword,
+                      child: const Text('Password Lost?'),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => SignInPage(),
+                          ),
+                        );
+                        },
+                      child: const Text('Sign in Here!'),
+                    ),
+                  ],
                 ),
               ],
             ),

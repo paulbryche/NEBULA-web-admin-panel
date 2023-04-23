@@ -14,7 +14,7 @@ class TeamMembersPage extends StatefulWidget {
 }
 
 class _TeamMembersPageState extends State<TeamMembersPage> {
-  List<User> userList = []; // List to store fetched users
+  List<NebulaUser> userList = []; // List to store fetched users
   String userTeam = '';
   String userType = '';
 
@@ -43,7 +43,7 @@ class _TeamMembersPageState extends State<TeamMembersPage> {
     await FirebaseFirestore.instance.collection('Users').where('Team', isEqualTo: userTeam).where('Team', isNotEqualTo: '').get();
 
     // Loop through the documents in the collection
-    List<User> users = []; // Temporary list to store fetched users
+    List<NebulaUser> users = []; // Temporary list to store fetched users
     querySnapshot.docs.forEach((doc) {
       // Access document fields using doc['field_name']
       String userId = doc['UserId'];
@@ -51,14 +51,16 @@ class _TeamMembersPageState extends State<TeamMembersPage> {
       String email = doc['Email'];
       String userType = doc['UserType'];
       String team = doc['Team'];
+      String subtype = doc['SubType'];
 
       // Create User objects and add to the temporary list
-      User user = User(
+      NebulaUser user = NebulaUser(
         UserId: userId,
         Name: name,
         Email: email,
         UserType: userType,
         Team: team,
+        SubType: subtype,
       );
       users.add(user);
     });
@@ -81,7 +83,7 @@ class _TeamMembersPageState extends State<TeamMembersPage> {
     );
   }
 
-  void deleteUserMembership(User user) async {
+  void deleteUserMembership(NebulaUser user) async {
     if (userType == 'User') {
       return (
       showDialog(
@@ -109,6 +111,7 @@ class _TeamMembersPageState extends State<TeamMembersPage> {
         'UserId': user.UserId,
         'Email': user.Email,
         'Team': '',
+        'SubType': user.SubType,
       };
 
       // Update the user document in Firestore
@@ -132,7 +135,7 @@ class _TeamMembersPageState extends State<TeamMembersPage> {
     }
   }
 
-  void deleteUser(User user) async {
+  void deleteUser(NebulaUser user) async {
     // Function to add a new user
     await showDialog(
       context: context,
@@ -203,7 +206,7 @@ class _TeamMembersPageState extends State<TeamMembersPage> {
               ListView.builder(
               itemCount: userList.length,
               itemBuilder: (context, index) {
-                User user = userList[index];
+                NebulaUser user = userList[index];
                 return ListTile(title: Text(user.Name),
                   subtitle: Text(user.Email),
                   trailing: ElevatedButton(

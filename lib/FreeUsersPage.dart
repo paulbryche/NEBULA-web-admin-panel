@@ -16,7 +16,7 @@ class FreeUsersPage extends StatefulWidget {
 class _FreeUsersPageState extends State<FreeUsersPage> {
   String userTeam = '';
   String userType = '';
-  List<User> userList = []; // List to store fetched users
+  List<NebulaUser> userList = []; // List to store fetched users
 
   @override
   void initState() {
@@ -43,7 +43,7 @@ class _FreeUsersPageState extends State<FreeUsersPage> {
     await FirebaseFirestore.instance.collection('Users').where('Team', isEqualTo: '').get();
 
     // Loop through the documents in the collection
-    List<User> users = []; // Temporary list to store fetched users
+    List<NebulaUser> users = []; // Temporary list to store fetched users
     querySnapshot.docs.forEach((doc) {
       // Access document fields using doc['field_name']
       String userId = doc['UserId'];
@@ -51,14 +51,16 @@ class _FreeUsersPageState extends State<FreeUsersPage> {
       String email = doc['Email'];
       String userType = doc['UserType'];
       String team = doc['Team'];
+      String subtype = doc['SubType'];
 
       // Create User objects and add to the temporary list
-      User user = User(
+      NebulaUser user = NebulaUser(
         UserId: userId,
         Name: name,
         Email: email,
         UserType: userType,
         Team: team,
+        SubType: subtype,
       );
       users.add(user);
     });
@@ -80,7 +82,7 @@ class _FreeUsersPageState extends State<FreeUsersPage> {
     );
   }
 
-  void addUserMembership(User user) async {
+  void addUserMembership(NebulaUser user) async {
     try {
       // Get a reference to the user document in Firestore
       QuerySnapshot querySnapshot = await FirebaseFirestore.instance.collection('Users').where('UserId', isEqualTo: user.UserId).limit(1).get();
@@ -92,6 +94,7 @@ class _FreeUsersPageState extends State<FreeUsersPage> {
         'UserId': user.UserId,
         'Email': user.Email,
         'Team': userTeam,
+        'SubType': user.SubType,
       };
 
       // Update the user document in Firestore
@@ -115,7 +118,7 @@ class _FreeUsersPageState extends State<FreeUsersPage> {
     }
   }
 
-  void addUser(User user) async {
+  void addUser(NebulaUser user) async {
     // Function to add a new user
     await showDialog(
       context: context,
@@ -186,7 +189,7 @@ class _FreeUsersPageState extends State<FreeUsersPage> {
               ListView.builder(
               itemCount: userList.length,
               itemBuilder: (context, index) {
-                User user = userList[index];
+                NebulaUser user = userList[index];
                 return ListTile(title: Text(user.Name),
                   subtitle: Text(user.Email),
                   trailing: ElevatedButton(

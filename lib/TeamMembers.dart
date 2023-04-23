@@ -168,6 +168,7 @@ class _TeamMembersPageState extends State<TeamMembersPage> {
         );
       },
     );
+    fetchUsers();
   }
 
   @override
@@ -175,25 +176,56 @@ class _TeamMembersPageState extends State<TeamMembersPage> {
     return Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.deepPurple[600],
-          title: const Text('Nebula Manager - Team Members Page'),
+          title: Text('Nebula Manager - Team Members Page - $userTeam'),
           actions: [
-            IconButton(
-              icon: const Icon(Icons.add_business),
-              onPressed: () {
-                Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(
-                    builder: (context) => const FreeUsersPage(),
-                  ),
-                );
-              },
-            ),
-            IconButton(
-              icon: const Icon(Icons.logout), // Icon for the disconnect button
-              onPressed: () async {
-                // Logout button onPressed event
-                _signOut(); // Perform the sign-out operation
-                // You can add additional code here, such as navigating to a login page
-              },
+            Row(
+              children: [
+                Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.add_business),
+                      onPressed: () {
+                        Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(
+                            builder: (context) => const FreeUsersPage(),
+                          ),
+                        );
+                      },
+                    ),
+                    const Text('Users Without Team'),
+                  ],
+                ),
+                const SizedBox(height: 10), // Add a SizedBox to create space between rows
+                Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.business_outlined),
+                      onPressed: () {
+                        Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(
+                            builder: (context) => const TeamMembersPage(),
+                          ),
+                        );
+                      },
+                    ),
+                    const Text('Team Members'),
+                  ],
+                ),
+                const SizedBox(height: 10), // Add a SizedBox to create space between rows
+                Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.logout),
+                      onPressed: () async {
+                        _signOut();
+                        // You can add additional code here, such as navigating to a login page
+                      },
+                    ),
+                    const Text('Logout'),
+                  ],
+                ),
+
+              ],
             ),
           ],
         ),

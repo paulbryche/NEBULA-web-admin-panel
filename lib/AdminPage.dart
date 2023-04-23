@@ -1,23 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:nebula_team_manager/FreeUsersPage.dart';
 import 'package:nebula_team_manager/LoginPage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'Classes.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import 'Classes.dart';
-import 'AdminPage.dart';
 
-class TeamMembersPage extends StatefulWidget {
-  const TeamMembersPage({Key? key}) : super (key: key);
+class AdminPage extends StatefulWidget {
+  const AdminPage({Key? key}) : super (key: key);
 
   @override
-  _TeamMembersPageState createState() => _TeamMembersPageState();
+  _AdminPageState createState() => _AdminPageState();
 }
 
-class _TeamMembersPageState extends State<TeamMembersPage> {
-  List<NebulaUser> userList = []; // List to store fetched users
+class _AdminPageState extends State<AdminPage> {
   String userTeam = '';
   String userType = '';
+  List<NebulaUser> userList = []; // List to store fetched users
 
   @override
   void initState() {
@@ -26,7 +24,6 @@ class _TeamMembersPageState extends State<TeamMembersPage> {
   }
 
   void fetchUsers() async {
-    //get user UID
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? uid = prefs.getString('uid');
 
@@ -38,18 +35,11 @@ class _TeamMembersPageState extends State<TeamMembersPage> {
       QueryDocumentSnapshot doc = querySnapshot.docs.first;
       userTeam = doc['Team'];
       userType = doc['UserType'];
-
-      if (userType == 'Admin') {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (context) => AdminPage(),
-          ),
-        );
-      }
+    }
 
     // Fetch users collection from Firestore with a query
     querySnapshot =
-    await FirebaseFirestore.instance.collection('Users').where('Team', isEqualTo: userTeam).where('Team', isNotEqualTo: '').get();
+    await FirebaseFirestore.instance.collection('Users').get();
 
     // Loop through the documents in the collection
     List<NebulaUser> users = []; // Temporary list to store fetched users
@@ -79,7 +69,6 @@ class _TeamMembersPageState extends State<TeamMembersPage> {
       userList = users;
     });
   }
-  }
 
   void _signOut() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -92,23 +81,7 @@ class _TeamMembersPageState extends State<TeamMembersPage> {
     );
   }
 
-  void deleteUserMembership(NebulaUser user) async {
-    if (userType == 'User') {
-      return (
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Error'),
-          content: const Text("You Don't have the permission for that"),
-          actions: [
-            TextButton(
-              child: const Text('OK'),
-              onPressed: () => Navigator.pop(context),
-            ),
-          ],
-        ),
-      ));
-    }
+  void addUserMembership(NebulaUser user) async {
     try {
       // Get a reference to the user document in Firestore
       QuerySnapshot querySnapshot = await FirebaseFirestore.instance.collection('Users').where('UserId', isEqualTo: user.UserId).limit(1).get();
@@ -119,7 +92,7 @@ class _TeamMembersPageState extends State<TeamMembersPage> {
         'UserType': user.UserType,
         'UserId': user.UserId,
         'Email': user.Email,
-        'Team': '',
+        'Team': userTeam,
         'SubType': user.SubType,
       };
 
@@ -144,13 +117,13 @@ class _TeamMembersPageState extends State<TeamMembersPage> {
     }
   }
 
-  void deleteUser(NebulaUser user) async {
+  void addUser(NebulaUser user) async {
     // Function to add a new user
     await showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Delete User Membership'),
+          title: const Text('Add User To Team'),
           content: Column(
             children: [
               Text(user.Name),
@@ -168,7 +141,7 @@ class _TeamMembersPageState extends State<TeamMembersPage> {
               onPressed: () {
                 setState(() {
                   //push database update
-                  deleteUserMembership(user);
+                  addUserMembership(user);
                 });
                 Navigator.pop(context);
               },
@@ -182,79 +155,11 @@ class _TeamMembersPageState extends State<TeamMembersPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (userType =='User') {
       return Scaffold(
           appBar: AppBar(
             backgroundColor: Colors.deepPurple[600],
-            title: const Text('Nebula Manager'),
+            title: const Text('Nebula Manager - Admin Page'),
             actions: [
-              Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.logout),
-                    onPressed: () async {
-                      _signOut();
-                      // You can add additional code here, such as navigating to a login page
-                    },
-                  ),
-                  const Text('Logout'),
-                ],
-              ),
-            ],
-          ),
-          backgroundColor: Colors.white,
-          body:
-          CustomPaint(
-            painter: CurvePainter(),
-            child: Column(
-              children: [
-                Row(
-                  children: const [
-                    Text('Nothing to see here. You can logout.'),
-                  ],
-                )
-              ],
-            ),
-          )
-      );
-    } else {
-      return Scaffold(
-          appBar: AppBar(
-            backgroundColor: Colors.deepPurple[600],
-            title: const Text('Nebula Manager - Users Without Team'),
-            actions: [
-              Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.add_business),
-                    onPressed: () {
-                      Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(
-                          builder: (context) => const FreeUsersPage(),
-                        ),
-                      );
-                    },
-                  ),
-                  const Text('Users Without Team'),
-                ],
-              ),
-              const SizedBox(height: 10), // Add a SizedBox to create space between rows
-              Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.business_outlined),
-                    onPressed: () {
-                      Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(
-                          builder: (context) => const TeamMembersPage(),
-                        ),
-                      );
-                    },
-                  ),
-                  const Text('Team Members'),
-                ],
-              ),
-              const SizedBox(height: 10), // Add a SizedBox to create space between rows
               Row(
                 children: [
                   IconButton(
@@ -287,7 +192,7 @@ class _TeamMembersPageState extends State<TeamMembersPage> {
                         ),
                         onPressed: () {
                           if (userType == 'TeamLeader') {
-                            deleteUser(user);
+                            addUser(user);
                           } else {
                             showDialog(
                               context: context,
@@ -304,7 +209,7 @@ class _TeamMembersPageState extends State<TeamMembersPage> {
                             );
                           }
                         },
-                        child: const Icon(Icons.delete),
+                        child: const Icon(Icons.add),
                       ),
                     );
                   },
@@ -314,7 +219,6 @@ class _TeamMembersPageState extends State<TeamMembersPage> {
           )
       );
     }
-  }
 }
 
 class CurvePainter extends CustomPainter {
@@ -327,8 +231,12 @@ class CurvePainter extends CustomPainter {
     var path = Path();
 
     path.moveTo(0, size.height * 0.9167);
-    path.quadraticBezierTo(size.width * 0.25, size.height * 0.875, size.width * 0.5, size.height * 0.9167);
-    path.quadraticBezierTo(size.width * 0.75, size.height * 0.9584, size.width * 1.0, size.height * 0.9167);
+    path.quadraticBezierTo(
+        size.width * 0.25, size.height * 0.875, size.width * 0.5,
+        size.height * 0.9167);
+    path.quadraticBezierTo(
+        size.width * 0.75, size.height * 0.9584, size.width * 1.0,
+        size.height * 0.9167);
     path.lineTo(size.width, size.height);
     path.lineTo(0, size.height);
 

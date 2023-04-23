@@ -5,7 +5,7 @@ import 'package:flutter_signin_button/flutter_signin_button.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'TeamMembers.dart';
-import 'SignInPage.dart';
+import 'SignUpPage.dart';
 import 'ResetPassword.dart';
 
 class LoginPage extends StatefulWidget {
@@ -204,7 +204,7 @@ class _LoginPageState extends State<LoginPage> {
                       onPressed: () {
                         Navigator.of(context).push(
                           MaterialPageRoute(
-                            builder: (context) => SignInPage(),
+                            builder: (context) => SignUpPage(),
                           ),
                         );
                         },

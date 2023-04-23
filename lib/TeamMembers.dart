@@ -173,106 +173,138 @@ class _TeamMembersPageState extends State<TeamMembersPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          backgroundColor: Colors.deepPurple[600],
-          title: Text('Nebula Manager - Team Members Page - $userTeam'),
-          actions: [
-            Row(
-              children: [
-                Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.add_business),
-                      onPressed: () {
-                        Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(
-                            builder: (context) => const FreeUsersPage(),
-                          ),
-                        );
-                      },
-                    ),
-                    const Text('Users Without Team'),
-                  ],
-                ),
-                const SizedBox(height: 10), // Add a SizedBox to create space between rows
-                Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.business_outlined),
-                      onPressed: () {
-                        Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(
-                            builder: (context) => const TeamMembersPage(),
-                          ),
-                        );
-                      },
-                    ),
-                    const Text('Team Members'),
-                  ],
-                ),
-                const SizedBox(height: 10), // Add a SizedBox to create space between rows
-                Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.logout),
-                      onPressed: () async {
-                        _signOut();
-                        // You can add additional code here, such as navigating to a login page
-                      },
-                    ),
-                    const Text('Logout'),
-                  ],
-                ),
-
-              ],
-            ),
-          ],
-        ),
-        backgroundColor: Colors.white,
-        body:
-        CustomPaint(
-          painter: CurvePainter(),
-          child: Stack(
-            children: [
-              ListView.builder(
-              itemCount: userList.length,
-              itemBuilder: (context, index) {
-                NebulaUser user = userList[index];
-                return ListTile(title: Text(user.Name),
-                  subtitle: Text(user.Email),
-                  trailing: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      primary: Colors.deepPurple, // Change button color here
-                    ),
-                    onPressed: () {
-                      if (userType == 'TeamLeader') {
-                        deleteUser(user);
-                      } else {
-                        showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: const Text('Error'),
-                            content: const Text("You Don't have the permission for that"),
-                            actions: [
-                              TextButton(
-                                child: const Text('OK'),
-                                onPressed: () => Navigator.pop(context),
-                              ),
-                            ],
-                          ),
-                        );
-                      }
+    if (userType =='User') {
+      return Scaffold(
+          appBar: AppBar(
+            backgroundColor: Colors.deepPurple[600],
+            title: const Text('Nebula Manager'),
+            actions: [
+              Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.logout),
+                    onPressed: () async {
+                      _signOut();
+                      // You can add additional code here, such as navigating to a login page
                     },
-                    child: const Icon(Icons.delete),
                   ),
-                );
-                },
+                  const Text('Logout'),
+                ],
               ),
             ],
           ),
-        )
-    );
+          backgroundColor: Colors.white,
+          body:
+          CustomPaint(
+            painter: CurvePainter(),
+            child: Column(
+              children: [
+                Row(
+                  children: const [
+                    Text('Nothing to see here. You can logout.'),
+                  ],
+                )
+              ],
+            ),
+          )
+      );
+    } else {
+      return Scaffold(
+          appBar: AppBar(
+            backgroundColor: Colors.deepPurple[600],
+            title: const Text('Nebula Manager - Users Without Team'),
+            actions: [
+              Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.add_business),
+                    onPressed: () {
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                          builder: (context) => const FreeUsersPage(),
+                        ),
+                      );
+                    },
+                  ),
+                  const Text('Users Without Team'),
+                ],
+              ),
+              const SizedBox(height: 10), // Add a SizedBox to create space between rows
+              Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.business_outlined),
+                    onPressed: () {
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                          builder: (context) => const TeamMembersPage(),
+                        ),
+                      );
+                    },
+                  ),
+                  const Text('Team Members'),
+                ],
+              ),
+              const SizedBox(height: 10), // Add a SizedBox to create space between rows
+              Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.logout),
+                    onPressed: () async {
+                      _signOut();
+                      // You can add additional code here, such as navigating to a login page
+                    },
+                  ),
+                  const Text('Logout'),
+                ],
+              ),
+            ],
+          ),
+          backgroundColor: Colors.white,
+          body:
+          CustomPaint(
+            painter: CurvePainter(),
+            child: Stack(
+              children: [
+                ListView.builder(
+                  itemCount: userList.length,
+                  itemBuilder: (context, index) {
+                    NebulaUser user = userList[index];
+                    return ListTile(title: Text(user.Name),
+                      subtitle: Text(user.Email),
+                      trailing: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          primary: Colors.deepPurple, // Change button color here
+                        ),
+                        onPressed: () {
+                          if (userType == 'TeamLeader') {
+                            deleteUser(user);
+                          } else {
+                            showDialog(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                title: const Text('Error'),
+                                content: const Text("You Don't have the permission for that"),
+                                actions: [
+                                  TextButton(
+                                    child: const Text('OK'),
+                                    onPressed: () => Navigator.pop(context),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }
+                        },
+                        child: const Icon(Icons.delete),
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+          )
+      );
+    }
   }
 }
 

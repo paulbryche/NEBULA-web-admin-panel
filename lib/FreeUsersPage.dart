@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:nebula_team_manager/Services/PopUp.dart';
 import 'package:nebula_team_manager/TeamMembers.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import 'Services/UserServices.dart';
 import 'Services/Logs.dart';
 import 'Classes.dart';
 
@@ -15,8 +15,8 @@ class FreeUsersPage extends StatefulWidget {
 }
 
 class _FreeUsersPageState extends State<FreeUsersPage> {
-  String userTeam = '';
-  String userType = '';
+  //actualUserData[0] = Team, [1] = UserType
+  List<String> actualUserData = ['', ''];
   List<NebulaUser> userList = []; // List to store fetched users
 
   @override
@@ -26,45 +26,14 @@ class _FreeUsersPageState extends State<FreeUsersPage> {
   }
 
   void fetchUsers() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? uid = prefs.getString('uid');
+    actualUserData = await getAcualUserDataFromFirestore();
 
-    //get user data from firestore
+    // Fetch users collection from Firestore with a query
     QuerySnapshot querySnapshot =
-    await FirebaseFirestore.instance.collection('Users').where('UserId', isEqualTo: uid).get();
-    if (querySnapshot.docs.isNotEmpty) {
-      // Access the first document in the querySnapshot
-      QueryDocumentSnapshot doc = querySnapshot.docs.first;
-      userTeam = doc['Team'];
-      userType = doc['UserType'];
-    }
-
-      // Fetch users collection from Firestore with a query
-    querySnapshot =
     await FirebaseFirestore.instance.collection('Users').where('Team', isEqualTo: '').get();
 
     // Loop through the documents in the collection
-    List<NebulaUser> users = []; // Temporary list to store fetched users
-    querySnapshot.docs.forEach((doc) {
-      // Access document fields using doc['field_name']
-      String userId = doc['UserId'];
-      String name = doc['Name'];
-      String email = doc['Email'];
-      String userType = doc['UserType'];
-      String team = doc['Team'];
-      String subtype = doc['SubType'];
-
-      // Create User objects and add to the temporary list
-      NebulaUser user = NebulaUser(
-        UserId: userId,
-        Name: name,
-        Email: email,
-        UserType: userType,
-        Team: team,
-        SubType: subtype,
-      );
-      users.add(user);
-    });
+    List<NebulaUser> users = getUsersFromQuerySnapshot(querySnapshot);
 
     // Update the state with the fetched users
     setState(() {
@@ -72,69 +41,9 @@ class _FreeUsersPageState extends State<FreeUsersPage> {
     });
   }
 
-  void addUserMembership(NebulaUser user) async {
-    try {
-      // Get a reference to the user document in Firestore
-      QuerySnapshot querySnapshot = await FirebaseFirestore.instance.collection('Users').where('UserId', isEqualTo: user.UserId).limit(1).get();
-
-      // Create a map with the updated data
-      Map<String, dynamic> updatedData = {
-        'Name': user.Name,
-        'UserType': user.UserType,
-        'UserId': user.UserId,
-        'Email': user.Email,
-        'Team': userTeam,
-        'SubType': user.SubType,
-      };
-
-      // Update the user document in Firestore
-      if (querySnapshot.docs.isNotEmpty) {
-        await querySnapshot.docs.first.reference.update(updatedData);
-      }
-    } catch (e) {
-      showDialogWithErrorMessage('An error occurred', context);
-    }
-  }
-
-  void addUser(NebulaUser user) async {
-    // Function to add a new user
-    await showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Add User To Team'),
-          content: Column(
-            children: [
-              Text(user.Name),
-            ],
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Cancel'),
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            ),
-            TextButton(
-              child: const Text('OK'),
-              onPressed: () {
-                setState(() {
-                  //push database update
-                  addUserMembership(user);
-                });
-                Navigator.pop(context);
-              },
-            ),
-          ],
-        );
-      },
-    );
-    fetchUsers();
-  }
-
   @override
   Widget build(BuildContext context) {
-    if (userType =='User') {
+    if (actualUserData[1] =='User') {
       return Scaffold(
           appBar: AppBar(
             backgroundColor: Colors.deepPurple[600],
@@ -238,10 +147,10 @@ class _FreeUsersPageState extends State<FreeUsersPage> {
                           primary: Colors.deepPurple, // Change button color here
                         ),
                         onPressed: () {
-                          if (userType == 'TeamLeader') {
-                            addUser(user);
+                          if (actualUserData[1] == 'TeamLeader') {
+                            addUser(user,context, actualUserData[0], fetchUsers);
                           } else {
-                            showDialogWithErrorMessage("You Don't have the permission for that", context);
+                            showDialogWithErrorMessage("You don't have the permission for that", context);
                           }
                         },
                         child: const Icon(Icons.add),

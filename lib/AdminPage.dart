@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:nebula_team_manager/LoginPage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'Classes.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+
+import 'Classes.dart';
 
 
 class AdminPage extends StatefulWidget {
@@ -81,7 +82,7 @@ class _AdminPageState extends State<AdminPage> {
     );
   }
 
-  void addUserMembership(NebulaUser user) async {
+  void updateUserFunc(NebulaUser user) async {
     try {
       // Get a reference to the user document in Firestore
       QuerySnapshot querySnapshot = await FirebaseFirestore.instance.collection('Users').where('UserId', isEqualTo: user.UserId).limit(1).get();
@@ -92,7 +93,7 @@ class _AdminPageState extends State<AdminPage> {
         'UserType': user.UserType,
         'UserId': user.UserId,
         'Email': user.Email,
-        'Team': userTeam,
+        'Team': user.Team,
         'SubType': user.SubType,
       };
 
@@ -100,6 +101,9 @@ class _AdminPageState extends State<AdminPage> {
       if (querySnapshot.docs.isNotEmpty) {
         await querySnapshot.docs.first.reference.update(updatedData);
       }
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('User Updated')),
+      );
     } catch (e) {
       showDialog(
         context: context,
@@ -117,39 +121,96 @@ class _AdminPageState extends State<AdminPage> {
     }
   }
 
-  void addUser(NebulaUser user) async {
-    // Function to add a new user
+  void updateUser(NebulaUser user) async {
+    String username = user.Name;
+    String updateuserteam = user.Team;
+    String subtype = user.SubType;
+    List<String> subtypes = ['Basic', 'Medium', 'Premium'];
+    String usertype = user.UserType;
+    List<String> usertypes = ['User', 'TeamLeader', 'Admin'];
+
     await showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Add User To Team'),
-          content: Column(
-            children: [
-              Text(user.Name),
-            ],
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Cancel'),
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            ),
-            TextButton(
-              child: const Text('OK'),
-              onPressed: () {
+        context: context,
+        builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('Update User'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            TextField(
+              decoration: InputDecoration(
+                labelText: 'Username',
+                hintText: user.Name,
+              ),
+              onChanged: (value) {
                 setState(() {
-                  //push database update
-                  addUserMembership(user);
+                  username = value;
                 });
-                Navigator.pop(context);
               },
             ),
+            const SizedBox(height: 16),
+            TextField(
+              decoration: InputDecoration(
+                labelText: 'Team',
+                hintText: updateuserteam,
+              ),
+              onChanged: (value) {
+                setState(() {
+                  updateuserteam = value;
+                });
+              },
+            ),
+            const SizedBox(height: 16),
+            DropdownButtonFormField(
+              value: subtype,
+              items: subtypes.map((subs) {
+                return DropdownMenuItem(
+                  value: subs,
+                  child: Text(subs),
+                );
+              }).toList(),
+              onChanged: (newValue) {
+                setState(() {
+                  subtype = newValue!;
+                });
+              },
+            ),
+            const SizedBox(height: 16),
+            DropdownButtonFormField(
+              value: usertype,
+              items: usertypes.map((type) {
+                return DropdownMenuItem(
+                  value: type,
+                  child: Text(type),
+                );
+              }).toList(),
+              onChanged: (newValue) {
+                setState(() {
+                  usertype = newValue!;
+                });
+              },
+            ),
+            const SizedBox(height: 16),
           ],
-        );
-      },
-    );
+        ),
+        actions: <Widget>[
+          TextButton(
+            child: const Text('Cancel'),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+          TextButton(
+            child: const Text('Update'),
+            onPressed: () {
+              NebulaUser updatedUser = NebulaUser(UserId: user.UserId, Name: username, Team: updateuserteam, Email: user.Email, SubType: subtype, UserType: usertype);
+              updateUserFunc(updatedUser);
+              Navigator.of(context).pop(); // Close the pop-up dialog
+            },
+          ),
+        ],
+      );
+    });
     fetchUsers();
   }
 
@@ -188,11 +249,11 @@ class _AdminPageState extends State<AdminPage> {
                       subtitle: Text(user.Email),
                       trailing: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          primary: Colors.deepPurple, // Change button color here
+                          backgroundColor: Colors.deepPurple, // Change button color here
                         ),
                         onPressed: () {
-                          if (userType == 'TeamLeader') {
-                            addUser(user);
+                          if (userType == 'Admin') {
+                            updateUser(user);
                           } else {
                             showDialog(
                               context: context,
@@ -209,7 +270,7 @@ class _AdminPageState extends State<AdminPage> {
                             );
                           }
                         },
-                        child: const Icon(Icons.add),
+                        child: const Icon(Icons.update),
                       ),
                     );
                   },

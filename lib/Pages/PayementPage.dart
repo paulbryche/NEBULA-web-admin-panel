@@ -42,11 +42,13 @@ class _PayementPageState extends State<PayementPage> {
     List<NebulaUser> users = getUsersFromQuerySnapshot(querySnapshot);
 
     querySnapshot =
-    await FirebaseFirestore.instance.collection('Subcriptions').get();
+    await FirebaseFirestore.instance.collection('Subscriptions').get();
 
     List<NebulaSubscription> nebulaSubscription = getNebulaSubscription(querySnapshot);
-
-    List<NebulaTeamSubscriptions> yourTeamSubcriptions =getTeamSubscriptions( users, nebulaSubscription);
+    print(nebulaSubscription[0].Name);
+    print(nebulaSubscription[1].Name);
+    print(nebulaSubscription[2].Name);
+    List<NebulaTeamSubscriptions> yourTeamSubcriptions = getTeamSubscriptions( users, nebulaSubscription);
 
     // Update the state with the fetched users
     setState(() {

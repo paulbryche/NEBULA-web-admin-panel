@@ -5,18 +5,18 @@ import '../Services/FirebaseServices.dart';
 import '../Services/Logs.dart';
 import '../Services/CustomPainter.dart';
 
-import '../Utilitaries/Classes.dart';
-import '../Utilitaries/PopUp.dart';
+import '../Utilities/Classes.dart';
+import '../Utilities/PopUp.dart';
 
 
 class AdminPage extends StatefulWidget {
   const AdminPage({Key? key}) : super (key: key);
 
   @override
-  _AdminPageState createState() => _AdminPageState();
+  AdminPageState createState() => AdminPageState();
 }
 
-class _AdminPageState extends State<AdminPage> {
+class AdminPageState extends State<AdminPage> {
   //actualUserData[0] = Team, [1] = UserType
   List<String> actualUserData = ['', ''];
   List<NebulaUser> userList = []; // List to store fetched users
@@ -28,7 +28,7 @@ class _AdminPageState extends State<AdminPage> {
   }
 
   void fetchUsers() async {
-    actualUserData = await getAcualUserDataFromFirestore();
+    actualUserData = await getActualUserDataFromFirestore();
 
     // Fetch users collection from Firestore with a query
     QuerySnapshot querySnapshot =

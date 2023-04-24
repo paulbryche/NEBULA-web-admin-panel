@@ -4,12 +4,11 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-
 import '../Services/Logs.dart';
 import '../Services/CustomPainter.dart';
 
-import '../Utilitaries/PopUp.dart';
-import '../Utilitaries/ResetPassword.dart';
+import '../Utilities/PopUp.dart';
+import '../Utilities/ResetPassword.dart';
 
 import 'TeamMembers.dart';
 import 'SignUpPage.dart';
@@ -18,10 +17,10 @@ class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super (key: key);
 
   @override
-  _LoginPageState createState() => _LoginPageState();
+  LoginPageState createState() => LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class LoginPageState extends State<LoginPage> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -41,7 +40,7 @@ class _LoginPageState extends State<LoginPage> {
       // If uid is present, user is already logged in
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (context) => TeamMembersPage(),
+          builder: (context) => const TeamMembersPage(),
         ),
       );
     }

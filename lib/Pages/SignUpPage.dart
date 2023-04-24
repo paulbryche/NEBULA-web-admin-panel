@@ -7,14 +7,14 @@ import 'package:google_sign_in/google_sign_in.dart';
 
 import '../Services/CustomPainter.dart';
 
-import '../Utilitaries/Classes.dart';
+import '../Utilities/Classes.dart';
 
 class SignUpPage extends StatefulWidget {
   @override
-  _SignUpPageState createState() => _SignUpPageState();
+  SignUpPageState createState() => SignUpPageState();
 }
 
-class _SignUpPageState extends State<SignUpPage> {
+class SignUpPageState extends State<SignUpPage> {
   final _formKey = GlobalKey<FormState>();
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   String? _email, _password, _name;

@@ -5,25 +5,25 @@ import '../Services/FirebaseServices.dart';
 import '../Services/Logs.dart';
 import '../Services/CustomPainter.dart';
 
-import '../Utilitaries/Classes.dart';
-import '../Utilitaries/UserPage.dart';
-import '../Utilitaries/TeamTableScreen.dart';
+import '../Utilities/Classes.dart';
+import '../Utilities/UserPage.dart';
+import '../Utilities/TeamTableScreen.dart';
 
 import 'TeamMembers.dart';
 import 'FreeUsersPage.dart';
 
-class PayementPage extends StatefulWidget {
-  const PayementPage({Key? key}) : super (key: key);
+class PaymentPage extends StatefulWidget {
+  const PaymentPage({Key? key}) : super (key: key);
 
   @override
-  _PayementPageState createState() => _PayementPageState();
+  PaymentPageState createState() => PaymentPageState();
 }
 
-class _PayementPageState extends State<PayementPage> {
+class PaymentPageState extends State<PaymentPage> {
   //actualUserData[0] = Team, [1] = UserType
   List<String> actualUserData = ['', ''];
   List<NebulaUser> userList = []; // List to store fetched users
-  List<NebulaTeamSubscriptions> teamSubcriptions = [];
+  List<NebulaTeamSubscriptions> teamSubscriptions = [];
 
   @override
   void initState() {
@@ -32,7 +32,7 @@ class _PayementPageState extends State<PayementPage> {
   }
 
   void fetchUsers() async {
-    actualUserData = await getAcualUserDataFromFirestore();
+    actualUserData = await getActualUserDataFromFirestore();
 
     // Fetch users collection from Firestore with a query
     QuerySnapshot querySnapshot =
@@ -45,15 +45,12 @@ class _PayementPageState extends State<PayementPage> {
     await FirebaseFirestore.instance.collection('Subscriptions').get();
 
     List<NebulaSubscription> nebulaSubscription = getNebulaSubscription(querySnapshot);
-    print(nebulaSubscription[0].Name);
-    print(nebulaSubscription[1].Name);
-    print(nebulaSubscription[2].Name);
-    List<NebulaTeamSubscriptions> yourTeamSubcriptions = getTeamSubscriptions( users, nebulaSubscription);
+    List<NebulaTeamSubscriptions> yourTeamSubscriptions = getTeamSubscriptions( users, nebulaSubscription);
 
     // Update the state with the fetched users
     setState(() {
       userList = users;
-      teamSubcriptions = yourTeamSubcriptions;
+      teamSubscriptions = yourTeamSubscriptions;
     });
   }
 
@@ -108,7 +105,7 @@ class _PayementPageState extends State<PayementPage> {
                     onPressed: () {
                       Navigator.of(context).pushReplacement(
                         MaterialPageRoute(
-                          builder: (context) => const PayementPage(),
+                          builder: (context) => const PaymentPage(),
                         ),
                       );
                     },
@@ -135,7 +132,7 @@ class _PayementPageState extends State<PayementPage> {
           body:
           CustomPaint(
             painter: CurvePainter(),
-            child: buildBillTable(teamSubcriptions),
+            child: buildBillTable(teamSubscriptions),
           )
       );
     }

@@ -5,21 +5,21 @@ import '../Services/FirebaseServices.dart';
 import '../Services/Logs.dart';
 import '../Services/CustomPainter.dart';
 
-import '../Utilitaries/Classes.dart';
-import '../Utilitaries/UserPage.dart';
-import '../Utilitaries/PopUp.dart';
+import '../Utilities/Classes.dart';
+import '../Utilities/UserPage.dart';
+import '../Utilities/PopUp.dart';
 
 import 'TeamMembers.dart';
-import 'PayementPage.dart';
+import 'PaymentPage.dart';
 
 class FreeUsersPage extends StatefulWidget {
   const FreeUsersPage({Key? key}) : super (key: key);
 
   @override
-  _FreeUsersPageState createState() => _FreeUsersPageState();
+  FreeUsersPageState createState() => FreeUsersPageState();
 }
 
-class _FreeUsersPageState extends State<FreeUsersPage> {
+class FreeUsersPageState extends State<FreeUsersPage> {
   //actualUserData[0] = Team, [1] = UserType
   List<String> actualUserData = ['', ''];
   List<NebulaUser> userList = []; // List to store fetched users
@@ -31,7 +31,7 @@ class _FreeUsersPageState extends State<FreeUsersPage> {
   }
 
   void fetchUsers() async {
-    actualUserData = await getAcualUserDataFromFirestore();
+    actualUserData = await getActualUserDataFromFirestore();
 
     // Fetch users collection from Firestore with a query
     QuerySnapshot querySnapshot =
@@ -97,7 +97,7 @@ class _FreeUsersPageState extends State<FreeUsersPage> {
                     onPressed: () {
                       Navigator.of(context).pushReplacement(
                         MaterialPageRoute(
-                          builder: (context) => const PayementPage(),
+                          builder: (context) => const PaymentPage(),
                         ),
                       );
                     },
@@ -134,7 +134,7 @@ class _FreeUsersPageState extends State<FreeUsersPage> {
                       subtitle: Text(user.Email),
                       trailing: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          primary: Colors.deepPurple, // Change button color here
+                          backgroundColor: Colors.deepPurple, // Change button color here
                         ),
                         onPressed: () {
                           if (actualUserData[1] == 'TeamLeader') {

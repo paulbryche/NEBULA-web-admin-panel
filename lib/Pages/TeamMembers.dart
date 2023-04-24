@@ -5,22 +5,22 @@ import '../Services/FirebaseServices.dart';
 import '../Services/Logs.dart';
 import '../Services/CustomPainter.dart';
 
-import '../Utilitaries/Classes.dart';
-import '../Utilitaries/PopUp.dart';
-import '../Utilitaries/UserPage.dart';
+import '../Utilities/Classes.dart';
+import '../Utilities/PopUp.dart';
+import '../Utilities/UserPage.dart';
 
 import 'AdminPage.dart';
 import 'FreeUsersPage.dart';
-import 'PayementPage.dart';
+import 'PaymentPage.dart';
 
 class TeamMembersPage extends StatefulWidget {
   const TeamMembersPage({Key? key}) : super (key: key);
 
   @override
-  _TeamMembersPageState createState() => _TeamMembersPageState();
+  TeamMembersPageState createState() => TeamMembersPageState();
 }
 
-class _TeamMembersPageState extends State<TeamMembersPage> {
+class TeamMembersPageState extends State<TeamMembersPage> {
   //actualUserData[0] = Team, [1] = UserType
   List<String> actualUserData = ['', ''];
   List<NebulaUser> userList = []; // List to store fetched users
@@ -32,7 +32,7 @@ class _TeamMembersPageState extends State<TeamMembersPage> {
   }
 
   void fetchUsers() async {
-    actualUserData = await getAcualUserDataFromFirestore();
+    actualUserData = await getActualUserDataFromFirestore();
 
     // Fetch users collection from Firestore with a query
     QuerySnapshot querySnapshot =
@@ -41,7 +41,7 @@ class _TeamMembersPageState extends State<TeamMembersPage> {
     if (actualUserData[1] == 'Admin') {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (context) => AdminPage(),
+          builder: (context) => const AdminPage(),
         ),
       );
     }
@@ -106,7 +106,7 @@ class _TeamMembersPageState extends State<TeamMembersPage> {
                     onPressed: () {
                       Navigator.of(context).pushReplacement(
                         MaterialPageRoute(
-                          builder: (context) => const PayementPage(),
+                          builder: (context) => const PaymentPage(),
                         ),
                       );
                     },
@@ -143,7 +143,7 @@ class _TeamMembersPageState extends State<TeamMembersPage> {
                       subtitle: Text(user.Email),
                       trailing: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          primary: Colors.deepPurple, // Change button color here
+                          backgroundColor: Colors.deepPurple, // Change button color here
                         ),
                         onPressed: () {
                           if (actualUserData[1] == 'TeamLeader') {

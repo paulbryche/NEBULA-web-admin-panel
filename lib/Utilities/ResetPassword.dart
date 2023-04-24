@@ -3,10 +3,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 class PasswordResetDialog extends StatefulWidget {
   @override
-  _PasswordResetDialogState createState() => _PasswordResetDialogState();
+  PasswordResetDialogState createState() => PasswordResetDialogState();
 }
 
-class _PasswordResetDialogState extends State<PasswordResetDialog> {
+class PasswordResetDialogState extends State<PasswordResetDialog> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
 

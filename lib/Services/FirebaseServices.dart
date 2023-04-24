@@ -2,23 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../Utilitaries/PopUp.dart';
-import '../Utilitaries/Classes.dart';
+import '../Utilities/PopUp.dart';
+import '../Utilities/Classes.dart';
 
 List<NebulaSubscription> getNebulaSubscription(QuerySnapshot querySnapshot) {
-  List<NebulaSubscription> subcriptions = [];
+  List<NebulaSubscription> subscriptions = [];
 
-  querySnapshot.docs.forEach((doc) {
+  for (var doc in querySnapshot.docs) {
     String name = doc['Name'];
     double price = doc['Price'];
 
-    NebulaSubscription subcription = NebulaSubscription(
+    NebulaSubscription subscription = NebulaSubscription(
       Name: name,
       Price: price,
     );
-    subcriptions.add(subcription);
-  });
-  return subcriptions;
+    subscriptions.add(subscription);
+  }
+  return subscriptions;
 }
 
 List<NebulaTeamSubscriptions> getTeamSubscriptions(List<NebulaUser> userList, List<NebulaSubscription> nebulaSubscription) {
@@ -60,7 +60,7 @@ List<NebulaTeamSubscriptions> getTeamSubscriptions(List<NebulaUser> userList, Li
 List<NebulaUser> getUsersFromQuerySnapshot(QuerySnapshot querySnapshot) {
   List<NebulaUser> users = [];
 
-  querySnapshot.docs.forEach((doc) {
+  for (var doc in querySnapshot.docs) {
     String userId = doc['UserId'];
     String name = doc['Name'];
     String email = doc['Email'];
@@ -77,11 +77,11 @@ List<NebulaUser> getUsersFromQuerySnapshot(QuerySnapshot querySnapshot) {
       SubType: subtype,
     );
     users.add(user);
-  });
+  }
   return users;
 }
 
-Future<List<String>> getAcualUserDataFromFirestore() async {
+Future<List<String>> getActualUserDataFromFirestore() async {
   List<String> userdata = ['', ''];
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String? uid = prefs.getString('uid');
@@ -213,7 +213,7 @@ void adminUpdateUser(NebulaUser user, BuildContext context, Function fetchUsers)
   );
 }
 
-Future<void> addUser(NebulaUser user, BuildContext context, String Team, Function fetchUsers) async {
+Future<void> addUser(NebulaUser user, BuildContext context, String team, Function fetchUsers) async {
   // Show an alert dialog to confirm the addition of the user
   await showDialog(
     context: context,
@@ -236,7 +236,7 @@ Future<void> addUser(NebulaUser user, BuildContext context, String Team, Functio
             child: const Text('OK'),
             onPressed: () async {
               // Add the user membership to Firestore and update the UI
-              updateUser(NebulaUser(UserId: user.UserId, Name: user.Name, Email: user.Email, UserType: user.UserType, Team: Team, SubType: user.SubType),context, 'User Added To Your Team', fetchUsers);
+              updateUser(NebulaUser(UserId: user.UserId, Name: user.Name, Email: user.Email, UserType: user.UserType, Team: team, SubType: user.SubType),context, 'User Added To Your Team', fetchUsers);
               Navigator.of(context).pop();
             },
           ),

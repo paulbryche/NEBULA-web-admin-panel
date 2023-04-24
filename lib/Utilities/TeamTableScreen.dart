@@ -6,16 +6,16 @@ Widget buildBillTable(List<NebulaTeamSubscriptions> items) {
   return Table(
     border: TableBorder.all(),
     children: [
-      TableRow(
+      const TableRow(
         decoration: BoxDecoration(
-          color: Colors.grey[200],
+          color: Colors.grey,
         ),
         children: [
           TableCell(
             child: Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: EdgeInsets.all(8.0),
               child: Text(
-                'Item',
+                'Subscriptions Type',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                 ),
@@ -24,9 +24,9 @@ Widget buildBillTable(List<NebulaTeamSubscriptions> items) {
           ),
           TableCell(
             child: Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: EdgeInsets.all(8.0),
               child: Text(
-                'Quantity',
+                'Number Of Team Members Subscriptions',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                 ),
@@ -35,9 +35,9 @@ Widget buildBillTable(List<NebulaTeamSubscriptions> items) {
           ),
           TableCell(
             child: Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: EdgeInsets.all(8.0),
               child: Text(
-                'Price',
+                'Price For 1 Subscription',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                 ),
@@ -46,7 +46,7 @@ Widget buildBillTable(List<NebulaTeamSubscriptions> items) {
           ),
           TableCell(
             child: Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: EdgeInsets.all(8.0),
               child: Text(
                 'Total',
                 style: TextStyle(
@@ -93,9 +93,9 @@ Widget buildBillTable(List<NebulaTeamSubscriptions> items) {
           color: Colors.grey[200],
         ),
         children: [
-          TableCell(
+          const TableCell(
             child: Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: EdgeInsets.all(8.0),
               child: Text(
                 '',
                 style: TextStyle(
@@ -104,9 +104,9 @@ Widget buildBillTable(List<NebulaTeamSubscriptions> items) {
               ),
             ),
           ),
-          TableCell(
+          const TableCell(
             child: Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: EdgeInsets.all(8.0),
               child: Text(
                 '',
                 style: TextStyle(
@@ -115,11 +115,11 @@ Widget buildBillTable(List<NebulaTeamSubscriptions> items) {
               ),
             ),
           ),
-          TableCell(
+          const TableCell(
             child: Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: EdgeInsets.all(8.0),
               child: Text(
-                'Total',
+                'Total For Your Team Subscriptions',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                 ),
@@ -132,7 +132,7 @@ Widget buildBillTable(List<NebulaTeamSubscriptions> items) {
               child: Text(
                 items.fold<double>(
                     0, (previousValue, element) => previousValue + (element.Quantity * element.Price)).toStringAsFixed(2),
-                style: TextStyle(
+                style: const TextStyle(
                   fontWeight: FontWeight.bold,
                 ),
               ),

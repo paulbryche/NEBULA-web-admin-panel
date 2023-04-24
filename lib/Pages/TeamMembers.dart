@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:nebula_team_manager/FreeUsersPage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import 'Services/UserServices.dart';
-import 'Services/Logs.dart';
-import 'Services/PopUp.dart';
+import '../Services/FirebaseServices.dart';
+import '../Services/Logs.dart';
+import '../Services/CustomPainter.dart';
 
-import 'Classes.dart';
-import 'Services/CustomPainter.dart';
+import '../Utilitaries/Classes.dart';
+import '../Utilitaries/PopUp.dart';
+import '../Utilitaries/UserPage.dart';
 
-import 'UserPage.dart';
 import 'AdminPage.dart';
+import 'FreeUsersPage.dart';
+import 'PayementPage.dart';
 
 class TeamMembersPage extends StatefulWidget {
   const TeamMembersPage({Key? key}) : super (key: key);
@@ -64,7 +65,7 @@ class _TeamMembersPageState extends State<TeamMembersPage> {
       return Scaffold(
           appBar: AppBar(
             backgroundColor: Colors.deepPurple[600],
-            title: Text('Nebula Manager - TeamMembers - ${actualUserData[1]}'),
+            title: Text('Nebula Manager - TeamMembers - Your Team: ${actualUserData[0]}'),
             actions: [
               Row(
                 children: [
@@ -95,6 +96,22 @@ class _TeamMembersPageState extends State<TeamMembersPage> {
                     },
                   ),
                   const Text('Team Members'),
+                ],
+              ),
+              const SizedBox(height: 10), // Add a SizedBox to create space between rows
+              Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.info),
+                    onPressed: () {
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                          builder: (context) => const PayementPage(),
+                        ),
+                      );
+                    },
+                  ),
+                  const Text('Team Infos'),
                 ],
               ),
               const SizedBox(height: 10), // Add a SizedBox to create space between rows

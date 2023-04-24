@@ -5,14 +5,14 @@ import 'package:flutter_signin_button/flutter_signin_button.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 
-import 'Services/Logs.dart';
-import 'Services/PopUp.dart';
+import '../Services/Logs.dart';
+import '../Services/CustomPainter.dart';
 
-import 'Services/CustomPainter.dart';
+import '../Utilitaries/PopUp.dart';
+import '../Utilitaries/ResetPassword.dart';
 
 import 'TeamMembers.dart';
 import 'SignUpPage.dart';
-import 'ResetPassword.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super (key: key);

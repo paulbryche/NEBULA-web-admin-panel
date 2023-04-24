@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'Services/Logs.dart';
-import 'Services/CustomPainter.dart';
+import '../Services/Logs.dart';
+import '../Services/CustomPainter.dart';
 
 Widget buildUserScreen(BuildContext context) {
   return Scaffold(

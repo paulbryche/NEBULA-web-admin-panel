@@ -2,8 +2,60 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'PopUp.dart';
-import '../Classes.dart';
+import '../Utilitaries/PopUp.dart';
+import '../Utilitaries/Classes.dart';
+
+List<NebulaSubscription> getNebulaSubscription(QuerySnapshot querySnapshot) {
+  List<NebulaSubscription> subcriptions = [];
+
+  querySnapshot.docs.forEach((doc) {
+    String name = doc['Name'];
+    double price = doc['Price'];
+
+    NebulaSubscription subcription = NebulaSubscription(
+      Name: name,
+      Price: price,
+    );
+    subcriptions.add(subcription);
+  });
+  return subcriptions;
+}
+
+List<NebulaTeamSubscriptions> getTeamSubscriptions(List<NebulaUser> userList, List<NebulaSubscription> nebulaSubscription) {
+  List<NebulaTeamSubscriptions> teamSubscriptions = [
+    NebulaTeamSubscriptions(
+      Name: nebulaSubscription[0].Name,
+      Quantity: 0,
+      Price: nebulaSubscription[0].Price,
+    ),
+    NebulaTeamSubscriptions(
+      Name: nebulaSubscription[1].Name,
+      Quantity: 0,
+      Price: nebulaSubscription[1].Price,
+    ),
+    NebulaTeamSubscriptions(
+      Name: nebulaSubscription[2].Name,
+      Quantity: 0,
+      Price: nebulaSubscription[2].Price,
+    ),
+  ];
+  List<NebulaTeamSubscriptions> updatedTeamSubscriptions = [];
+
+  for (NebulaTeamSubscriptions subscription in teamSubscriptions) {
+    int quantity = 0;
+    for (NebulaUser user in userList) {
+      if (user.SubType == subscription.Name) {
+        quantity += 1;
+      }
+    }
+    updatedTeamSubscriptions.add(NebulaTeamSubscriptions(
+      Name: subscription.Name,
+      Quantity: quantity,
+      Price: subscription.Price,
+    ));
+  }
+  return updatedTeamSubscriptions;
+}
 
 List<NebulaUser> getUsersFromQuerySnapshot(QuerySnapshot querySnapshot) {
   List<NebulaUser> users = [];

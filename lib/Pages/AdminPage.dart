@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:nebula_team_manager/Services/PopUp.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import 'Services/UserServices.dart';
-import 'Services/Logs.dart';
+import '../Services/FirebaseServices.dart';
+import '../Services/Logs.dart';
+import '../Services/CustomPainter.dart';
 
-import 'Services/CustomPainter.dart';
-import 'Classes.dart';
+import '../Utilitaries/Classes.dart';
+import '../Utilitaries/PopUp.dart';
 
 
 class AdminPage extends StatefulWidget {

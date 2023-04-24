@@ -5,8 +5,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
-import 'Services/CustomPainter.dart';
-import 'Classes.dart';
+import '../Services/CustomPainter.dart';
+
+import '../Utilitaries/Classes.dart';
 
 class SignUpPage extends StatefulWidget {
   @override

@@ -1,27 +1,29 @@
 import 'package:flutter/material.dart';
-import 'package:nebula_team_manager/Services/PopUp.dart';
-import 'package:nebula_team_manager/TeamMembers.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import 'Services/UserServices.dart';
-import 'Services/Logs.dart';
-import 'Services/CustomPainter.dart';
+import '../Services/FirebaseServices.dart';
+import '../Services/Logs.dart';
+import '../Services/CustomPainter.dart';
 
-import 'Classes.dart';
+import '../Utilitaries/Classes.dart';
+import '../Utilitaries/UserPage.dart';
+import '../Utilitaries/TeamTableScreen.dart';
 
-import 'UserPage.dart';
+import 'TeamMembers.dart';
+import 'FreeUsersPage.dart';
 
-class FreeUsersPage extends StatefulWidget {
-  const FreeUsersPage({Key? key}) : super (key: key);
+class PayementPage extends StatefulWidget {
+  const PayementPage({Key? key}) : super (key: key);
 
   @override
-  _FreeUsersPageState createState() => _FreeUsersPageState();
+  _PayementPageState createState() => _PayementPageState();
 }
 
-class _FreeUsersPageState extends State<FreeUsersPage> {
+class _PayementPageState extends State<PayementPage> {
   //actualUserData[0] = Team, [1] = UserType
   List<String> actualUserData = ['', ''];
   List<NebulaUser> userList = []; // List to store fetched users
+  List<NebulaTeamSubscriptions> teamSubcriptions = [];
 
   @override
   void initState() {
@@ -34,14 +36,22 @@ class _FreeUsersPageState extends State<FreeUsersPage> {
 
     // Fetch users collection from Firestore with a query
     QuerySnapshot querySnapshot =
-    await FirebaseFirestore.instance.collection('Users').where('Team', isEqualTo: '').get();
+    await FirebaseFirestore.instance.collection('Users').where('Team', isEqualTo: actualUserData[0]).where('Team', isNotEqualTo: '').get();
 
     // Loop through the documents in the collection
     List<NebulaUser> users = getUsersFromQuerySnapshot(querySnapshot);
 
+    querySnapshot =
+    await FirebaseFirestore.instance.collection('Subcriptions').get();
+
+    List<NebulaSubscription> nebulaSubscription = getNebulaSubscription(querySnapshot);
+
+    List<NebulaTeamSubscriptions> yourTeamSubcriptions =getTeamSubscriptions( users, nebulaSubscription);
+
     // Update the state with the fetched users
     setState(() {
       userList = users;
+      teamSubcriptions = yourTeamSubcriptions;
     });
   }
 
@@ -55,7 +65,7 @@ class _FreeUsersPageState extends State<FreeUsersPage> {
       return Scaffold(
           appBar: AppBar(
             backgroundColor: Colors.deepPurple[600],
-            title: const Text('Nebula Manager - Users Without Team'),
+            title: Text('Nebula Manager - Team Subcriptions - Your Team: ${actualUserData[0]}'),
             actions: [
               Row(
                 children: [
@@ -92,6 +102,22 @@ class _FreeUsersPageState extends State<FreeUsersPage> {
               Row(
                 children: [
                   IconButton(
+                    icon: const Icon(Icons.info),
+                    onPressed: () {
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                          builder: (context) => const PayementPage(),
+                        ),
+                      );
+                    },
+                  ),
+                  const Text('Team Infos'),
+                ],
+              ),
+              const SizedBox(height: 10), // Add a SizedBox to create space between rows
+              Row(
+                children: [
+                  IconButton(
                     icon: const Icon(Icons.logout),
                     onPressed: () async {
                       signOut(context);
@@ -107,32 +133,7 @@ class _FreeUsersPageState extends State<FreeUsersPage> {
           body:
           CustomPaint(
             painter: CurvePainter(),
-            child: Stack(
-              children: [
-                ListView.builder(
-                  itemCount: userList.length,
-                  itemBuilder: (context, index) {
-                    NebulaUser user = userList[index];
-                    return ListTile(title: Text(user.Name),
-                      subtitle: Text(user.Email),
-                      trailing: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          primary: Colors.deepPurple, // Change button color here
-                        ),
-                        onPressed: () {
-                          if (actualUserData[1] == 'TeamLeader') {
-                            addUser(user,context, actualUserData[0], fetchUsers);
-                          } else {
-                            showDialogWithErrorMessage("You don't have the permission for that", context);
-                          }
-                        },
-                        child: const Icon(Icons.add),
-                      ),
-                    );
-                  },
-                ),
-              ],
-            ),
+            child: buildBillTable(teamSubcriptions),
           )
       );
     }

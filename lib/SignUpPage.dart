@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
+import 'Services/CustomPainter.dart';
 import 'Classes.dart';
 
 class SignUpPage extends StatefulWidget {
@@ -113,75 +114,78 @@ class _SignUpPageState extends State<SignUpPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Sign In'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 16.0),
-              TextFormField(
-                decoration: const InputDecoration(
-                  labelText: 'Name',
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your name';
-                  }
-                  return null;
-                },
-                onSaved: (value) {
-                  _name = value;
-                },
-              ),
-              TextFormField(
-                keyboardType: TextInputType.emailAddress,
-                decoration: const InputDecoration(
-                  labelText: 'Email',
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your email';
-                  }
-                  return null;
-                },
-                onSaved: (value) {
-                  _email = value;
-                },
-              ),
-              const SizedBox(height: 16.0),
-              TextFormField(
-                obscureText: true,
-                decoration: const InputDecoration(
-                  labelText: 'Password',
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your password';
-                  }
-                  return null;
-                },
-                onSaved: (value) {
-                  _password = value;
-                },
-              ),
-              const SizedBox(height: 16.0),
-              ElevatedButton(
-                onPressed: _submit,
-                child: const Text('Sign In'),
-              ),
-              SignInButton(
-                Buttons.Google,
-                onPressed: _googleSignUp,
-              ),
-            ],
-          ),
+        appBar: AppBar(
+          title: const Text('Sign In'),
         ),
-      ),
-    );
+        body:
+        CustomPaint(
+          painter: CurvePainter(),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 16.0),
+                  TextFormField(
+                    decoration: const InputDecoration(
+                      labelText: 'Name',
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter your name';
+                      }
+                      return null;
+                    },
+                    onSaved: (value) {
+                      _name = value;
+                    },
+                  ),
+                  TextFormField(
+                    keyboardType: TextInputType.emailAddress,
+                    decoration: const InputDecoration(
+                      labelText: 'Email',
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter your email';
+                      }
+                      return null;
+                    },
+                    onSaved: (value) {
+                      _email = value;
+                    },
+                  ),
+                  const SizedBox(height: 16.0),
+                  TextFormField(
+                    obscureText: true,
+                    decoration: const InputDecoration(
+                      labelText: 'Password',
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter your password';
+                      }
+                      return null;
+                    },
+                    onSaved: (value) {
+                      _password = value;
+                    },
+                  ),
+                  const SizedBox(height: 16.0),
+                  ElevatedButton(
+                    onPressed: _submit,
+                    child: const Text('Sign In'),
+                  ),
+                  SignInButton(
+                    Buttons.Google,
+                    onPressed: _googleSignUp,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ));
   }
 }

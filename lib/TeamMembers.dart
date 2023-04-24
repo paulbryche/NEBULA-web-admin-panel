@@ -7,7 +7,9 @@ import 'Services/Logs.dart';
 import 'Services/PopUp.dart';
 
 import 'Classes.dart';
+import 'Services/CustomPainter.dart';
 
+import 'UserPage.dart';
 import 'AdminPage.dart';
 
 class TeamMembersPage extends StatefulWidget {
@@ -54,41 +56,10 @@ class _TeamMembersPageState extends State<TeamMembersPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (actualUserData[1] =='User') {
-      return Scaffold(
-          appBar: AppBar(
-            backgroundColor: Colors.deepPurple[600],
-            title: const Text('Nebula Manager'),
-            actions: [
-              Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.logout),
-                    onPressed: () async {
-                      signOut(context);
-                      // You can add additional code here, such as navigating to a login page
-                    },
-                  ),
-                  const Text('Logout'),
-                ],
-              ),
-            ],
-          ),
-          backgroundColor: Colors.white,
-          body:
-          CustomPaint(
-            painter: CurvePainter(),
-            child: Column(
-              children: [
-                Row(
-                  children: const [
-                    Text('Nothing to see here. You can logout.'),
-                  ],
-                )
-              ],
-            ),
-          )
-      );
+    Widget screen;
+    if (actualUserData[1] == 'User') {
+      screen = buildUserScreen(context);
+      return screen;
     } else {
       return Scaffold(
           appBar: AppBar(
@@ -174,29 +145,5 @@ class _TeamMembersPageState extends State<TeamMembersPage> {
           )
       );
     }
-  }
-}
-
-class CurvePainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    var paint = Paint();
-    paint.color = Colors.deepPurple;
-    paint.style = PaintingStyle.fill;
-
-    var path = Path();
-
-    path.moveTo(0, size.height * 0.9167);
-    path.quadraticBezierTo(size.width * 0.25, size.height * 0.875, size.width * 0.5, size.height * 0.9167);
-    path.quadraticBezierTo(size.width * 0.75, size.height * 0.9584, size.width * 1.0, size.height * 0.9167);
-    path.lineTo(size.width, size.height);
-    path.lineTo(0, size.height);
-
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) {
-    return true;
   }
 }

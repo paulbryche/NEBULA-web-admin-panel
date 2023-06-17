@@ -37,6 +37,7 @@ dependencies:
   google_sign_in: ^5.0.6
   flutter_signin_button: ^2.0.0
   flutter_bloc: ^8.0.1
+  http: 1.0.0
 
   #tool to save actual user
   shared_preferences: ^2.1.0
@@ -44,6 +45,7 @@ dependencies:
 
   #batabase access
   cloud_firestore: ^4.5.1
+  postgrest: ^1.2.4
 
 
   # The following adds the Cupertino Icons font to your application.

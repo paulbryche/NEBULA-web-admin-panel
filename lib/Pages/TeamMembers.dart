@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 import '../Services/FirebaseServices.dart';
 import '../Services/Logs.dart';
@@ -25,6 +27,7 @@ class TeamMembersPageState extends State<TeamMembersPage> {
   List<String> actualUserData = ['', ''];
   List<NebulaUser> userList = []; // List to store fetched users
 
+
   @override
   void initState() {
     super.initState();
@@ -33,27 +36,26 @@ class TeamMembersPageState extends State<TeamMembersPage> {
 
   void fetchUsers() async {
     actualUserData = await getActualUserDataFromFirestore();
-
-    // Fetch users collection from Firestore with a query
-    QuerySnapshot querySnapshot =
-    await FirebaseFirestore.instance.collection('Users').where('Team', isEqualTo: actualUserData[0]).where('Team', isNotEqualTo: '').get();
-
-    if (actualUserData[1] == 'Admin') {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (context) => const AdminPage(),
-        ),
-      );
+    var actualUserTeam = actualUserData[0];
+    // Fetch users collection from the API with a query
+    final apiUrl = Uri.parse('http://127.0.0.1:8000/nebula_users/called_teammembers?Team=$actualUserTeam');
+    var response = await http.get(apiUrl);
+    if (response.statusCode == 200) {
+      List<dynamic> responseBody = jsonDecode(response.body);
+      List<NebulaUser> users = getUsersFromDynamicList(responseBody);
+      if (actualUserData[1] == 'Admin') {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => const AdminPage(),
+          ),
+        );
+      }
+      setState(() {
+        userList = users;
+      });
     }
-
-    // Loop through the documents in the collection
-    List<NebulaUser> users = getUsersFromQuerySnapshot(querySnapshot);
-
-    // Update the state with the fetched users
-    setState(() {
-      userList = users;
-    });
   }
+
 
   @override
   Widget build(BuildContext context) {

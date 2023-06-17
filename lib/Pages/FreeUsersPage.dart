@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 import '../Services/FirebaseServices.dart';
 import '../Services/Logs.dart';
@@ -32,18 +33,19 @@ class FreeUsersPageState extends State<FreeUsersPage> {
 
   void fetchUsers() async {
     actualUserData = await getActualUserDataFromFirestore();
-
-    // Fetch users collection from Firestore with a query
-    QuerySnapshot querySnapshot =
-    await FirebaseFirestore.instance.collection('Users').where('Team', isEqualTo: '').get();
-
-    // Loop through the documents in the collection
-    List<NebulaUser> users = getUsersFromQuerySnapshot(querySnapshot);
-
-    // Update the state with the fetched users
-    setState(() {
-      userList = users;
-    });
+    try {
+      final apiUrl = Uri.parse('http://127.0.0.1:8000/nebula_users/without_team');
+      var response = await http.get(apiUrl);
+      if (response.statusCode == 200) {
+        List<dynamic> responseBody = jsonDecode(response.body);
+        List<NebulaUser> users = getUsersFromDynamicList(responseBody);
+        setState(() {
+          userList = users;
+        });
+      }
+    } catch (e) {
+      print(e.toString());
+    }
   }
 
   @override

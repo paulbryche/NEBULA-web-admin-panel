@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 import '../Services/FirebaseServices.dart';
 import '../Services/Logs.dart';
@@ -33,25 +35,35 @@ class PaymentPageState extends State<PaymentPage> {
 
   void fetchUsers() async {
     actualUserData = await getActualUserDataFromFirestore();
+    var actualUserTeam = actualUserData[0];
 
-    // Fetch users collection from Firestore with a query
-    QuerySnapshot querySnapshot =
-    await FirebaseFirestore.instance.collection('Users').where('Team', isEqualTo: actualUserData[0]).where('Team', isNotEqualTo: '').get();
+    // Fetch users collection from the API with a query
+    final apiUrl = Uri.parse('http://127.0.0.1:8000/nebula_users/called_teammembers?Team=$actualUserTeam');
+    var usersResponse = await http.get(apiUrl);
 
-    // Loop through the documents in the collection
-    List<NebulaUser> users = getUsersFromQuerySnapshot(querySnapshot);
+    // Fetch subscriptions collection from the API
+    final subscriptionsApiUrl = Uri.parse('http://127.0.0.1:8000/nebula_subscriptions');
+    var subscriptionsResponse = await http.get(subscriptionsApiUrl);
 
-    querySnapshot =
-    await FirebaseFirestore.instance.collection('Subscriptions').get();
+    if (usersResponse.statusCode == 200 && subscriptionsResponse.statusCode == 200) {
+      List<dynamic> usersResponseBody = jsonDecode(usersResponse.body);
+      List<dynamic> subscriptionsResponseBody = jsonDecode(subscriptionsResponse.body);
 
-    List<NebulaSubscription> nebulaSubscription = getNebulaSubscription(querySnapshot);
-    List<NebulaTeamSubscriptions> yourTeamSubscriptions = getTeamSubscriptions( users, nebulaSubscription);
+      List<NebulaUser> users = getUsersFromDynamicList(usersResponseBody);
+      for (var i in users) {
+        print(i.SubType);
+      }
+      List<NebulaSubscription> nebulaSubscription = getNebulaSubscription(subscriptionsResponseBody);
+      for (var i in nebulaSubscription) {
+        print(i.Name);
+      }
+      List<NebulaTeamSubscriptions> yourTeamSubscriptions = getTeamSubscriptions(users, nebulaSubscription);
 
-    // Update the state with the fetched users
-    setState(() {
-      userList = users;
-      teamSubscriptions = yourTeamSubscriptions;
-    });
+      setState(() {
+        userList = users;
+        teamSubscriptions = yourTeamSubscriptions;
+      });
+    }
   }
 
   @override

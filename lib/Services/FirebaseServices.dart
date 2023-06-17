@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 import '../Utilities/PopUp.dart';
 import '../Utilities/Classes.dart';
 
-List<NebulaSubscription> getNebulaSubscription(QuerySnapshot querySnapshot) {
+List<NebulaSubscription> getNebulaSubscription(List<dynamic> querySnapshot) {
   List<NebulaSubscription> subscriptions = [];
 
-  for (var doc in querySnapshot.docs) {
+  for (var doc in querySnapshot) {
     String name = doc['Name'];
     double price = doc['Price'];
 
@@ -57,28 +59,28 @@ List<NebulaTeamSubscriptions> getTeamSubscriptions(List<NebulaUser> userList, Li
   return updatedTeamSubscriptions;
 }
 
-List<NebulaUser> getUsersFromQuerySnapshot(QuerySnapshot querySnapshot) {
-  List<NebulaUser> users = [];
+List<NebulaUser> getUsersFromDynamicList(List<dynamic> dynamicList) {
+  List<NebulaUser> nebulaUserList = [];
 
-  for (var doc in querySnapshot.docs) {
-    String userId = doc['UserId'];
-    String name = doc['Name'];
-    String email = doc['Email'];
-    String userType = doc['UserType'];
-    String team = doc['Team'];
-    String subtype = doc['SubType'];
+  for (dynamic item in dynamicList) {
+    String userId = item['UserId'] ?? '';
+    String name = item['Name'] ?? '';
+    String email = item['Email'] ?? '';
+    String userType = item['UserType'] ?? '';
+    String team = item['Team'] ?? '';
+    String subType = item['SubType'] ?? '';
 
-    NebulaUser user = NebulaUser(
+    NebulaUser nebulaUser = NebulaUser(
       UserId: userId,
       Name: name,
       Email: email,
       UserType: userType,
       Team: team,
-      SubType: subtype,
+      SubType: subType,
     );
-    users.add(user);
+    nebulaUserList.add(nebulaUser);
   }
-  return users;
+  return nebulaUserList;
 }
 
 Future<List<String>> getActualUserDataFromFirestore() async {
@@ -86,48 +88,50 @@ Future<List<String>> getActualUserDataFromFirestore() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String? uid = prefs.getString('uid');
 
-  //get user data from firestore
-  QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-      .collection('Users')
-      .where('UserId', isEqualTo: uid)
-      .get();
+  print(uid);
 
-  if (querySnapshot.docs.isNotEmpty) {
-    // Access the first document in the querySnapshot
-    QueryDocumentSnapshot doc = querySnapshot.docs.first;
-    userdata[0] = doc['Team'];
-    userdata[1] = doc['UserType'];
+  // Get user data from the API
+  final apiUrl = Uri.parse('http://127.0.0.1:8000/user_data?uid=$uid');
+  var response = await http.get(apiUrl);
+  if (response.statusCode == 200) {
+    Map<String, dynamic> responseBody = jsonDecode(response.body);
+    userdata[0] = responseBody['Team'];
+    userdata[1] = responseBody['UserType'];
   }
-  return (userdata);
+  userdata[0] = "Team A";
+  userdata[1] = "TeamLeader";
+  print(userdata);
+  return userdata;
 }
 
 void updateUser(NebulaUser user, BuildContext context, String updateType, Function fetchUsers) async {
   try {
-    // Get a reference to the user document in Firestore
-    QuerySnapshot querySnapshot = await FirebaseFirestore.instance.collection('Users').where('UserId', isEqualTo: user.UserId).limit(1).get();
-
-    // Create a map with the updated data
-    Map<String, dynamic> updatedData = {
-      'Name': user.Name,
-      'UserType': user.UserType,
-      'UserId': user.UserId,
-      'Email': user.Email,
-      'Team': user.Team,
-      'SubType': user.SubType,
-    };
-
-    // Update the user document in Firestore
-    if (querySnapshot.docs.isNotEmpty) {
-      await querySnapshot.docs.first.reference.update(updatedData);
-      fetchUsers();
-    }
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(updateType)),
+    final apiUrl = Uri.parse('http://127.0.0.1:8000/nebula_users');
+    final response = await http.put(
+      apiUrl,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'UserId': user.UserId,
+        'Name': user.Name,
+        'UserType': user.UserType,
+        'Email': user.Email,
+        'Team': user.Team,
+        'SubType': user.SubType,
+      }),
     );
+    if (response.statusCode == 200) {
+      fetchUsers();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(updateType)),
+      );
+    } else {
+      showDialogWithErrorMessage('Failed to update user', context);
+    }
   } catch (e) {
     showDialogWithErrorMessage('An error occurred: $e', context);
   }
 }
+
 
 void adminUpdateUser(NebulaUser user, BuildContext context, Function fetchUsers) async {
   String username = user.Name;

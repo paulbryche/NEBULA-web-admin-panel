@@ -8,6 +8,8 @@ import '../Services/CustomPainter.dart';
 import '../Utilities/Classes.dart';
 import '../Utilities/PopUp.dart';
 
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class AdminPage extends StatefulWidget {
   const AdminPage({Key? key}) : super (key: key);
@@ -29,18 +31,19 @@ class AdminPageState extends State<AdminPage> {
 
   void fetchUsers() async {
     actualUserData = await getActualUserDataFromFirestore();
-
-    // Fetch users collection from Firestore with a query
-    QuerySnapshot querySnapshot =
-    await FirebaseFirestore.instance.collection('Users').get();
-
-    // Loop through the documents in the collection
-    List<NebulaUser> users = getUsersFromQuerySnapshot(querySnapshot); // Temporary list to store fetched users
-
-    // Update the state with the fetched users
-    setState(() {
-      userList = users;
-    });
+    try {
+      final apiUrl = Uri.parse('http://127.0.0.1:8000/nebula_users');
+      var response = await http.get(apiUrl);
+      if (response.statusCode == 200) {
+        List<dynamic> responseBody = jsonDecode(response.body);
+        List<NebulaUser> users = getUsersFromDynamicList(responseBody);
+        setState(() {
+          userList = users;
+        });
+      }
+    } catch (e) {
+      print(e.toString());
+    }
   }
 
   @override
